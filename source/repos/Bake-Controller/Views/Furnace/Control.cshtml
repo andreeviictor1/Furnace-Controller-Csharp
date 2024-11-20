@@ -1,0 +1,80 @@
+﻿@{
+    ViewData["Title"] = "Controle do Forno";
+}
+
+<h2 class="mt-5">Controle do Forno</h2>
+
+<table class="table table-striped table-bordered mt-4">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Modelo</th>
+            <th scope="col">Cliente</th>
+            <th scope="col">Hora de Início</th>
+            <th scope="col">Turno</th>
+            <th scope="col">Usuário</th>
+            <th scope="col">Matrícula</th>
+            <th scope="col">Status</th>
+            <th scope="col">Ação</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var elapsedTime = DateTime.Now - item.HoraInicio;
+            string badgeClass = elapsedTime.TotalHours >= 12 ? "badge bg-success text-white" : "badge bg-primary text-white";
+            string badgeText = elapsedTime.TotalHours >= 12 ? "Tempo Concluído" : "Dentro do Tempo";
+            bool isButtonEnabled = elapsedTime.TotalHours >= 12;
+
+            <tr>
+                <td>@item.PlacaId</td>
+                <td>@item.Cliente</td>
+                <td>@item.HoraInicio.ToString("g")</td>
+                <td>@item.Turno</td>
+                <td>@item.Usuario</td>
+                <td>@item.Matricula</td>
+                <td>
+                    <span class="@badgeClass">@badgeText</span>
+                </td>
+                <td>
+                    <button class="btn @(isButtonEnabled ? "btn-danger" : "btn-secondary") btn-sm"
+                            data-toggle="modal" data-target="#loginModal-@item.PlacaId"
+                    @(isButtonEnabled ? "" : "disabled")>
+                        @(isButtonEnabled ? "Retirar do Forno" : "Finalizar")
+                    </button>
+
+                    <!-- modal de login -->
+                    <div class="modal fade" id="loginModal-@item.PlacaId" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel-@item.PlacaId" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="loginModalLabel-@item.PlacaId">Número de Matrícula</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="post" action="@Url.Action("RetirarDoForno", "Furnace", new { id = item.Id })">
+                                        <div class="form-group">
+                                            <label for="loginInput-@item.PlacaId">Número de Matrícula</label>
+                                            <input type="text" class="form-control" id="loginInput-@item.PlacaId" name="login" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-danger mt-3">Confirmar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Index", "Home")" class="btn btn-secondary mt-3">Voltar à Página Inicial</a>
+<a href="@Url.Action("Retirados", "Furnace")" class="btn btn-primary mt-3">Ver Itens Retirados</a>
+
+
+<!-- Scripts do Bootstrap -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popperjs/core@2.9.1/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" crossorigin="anonymous"></script>
